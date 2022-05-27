@@ -4,17 +4,19 @@ import requests
 import os
 import time
 import logging
+import configparser
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
-embyApiKey = 'ea02771437fc42499b434dbc18c86553'
-adminId = '5c0e8d43ff67494e936779c0a1615847'
 
+## Get config.ini values
+config = configparser.ConfigParser()
+config.read('config.ini')
+embyApiKey = config.get("SETTINGS","embyApiKey")
+adminId = config.get("SETTINGS","adminId")
 
 def main():
 
     itemFile = []
-    # percentage = [0]
-    # episodesCount = [0]
 
     # Radarr env variables
     radarrFileName = os.environ.get('radarr_moviefile_relativepath')
@@ -102,7 +104,6 @@ def main():
     # api call to local rclone with current transfers
     def checkUpload(host, srcFileName, title, imdbId):
         r = requests.post(host, auth=('joaquin', '40575566'))
-        fatalError = r.json()['fatalError']
 
         def checkFilmList(item):
                 rcloneFileName = os.path.basename(item["name"])
@@ -125,7 +126,7 @@ def main():
                         checkUpload(host, srcFileName, title, imdbId)
                 else:
                         embyRequest(imdbId)
-                
+
         except KeyError as e:
                 if len(itemFile) > 0 and itemFile[0]["percentage"] >= 98:
                     embyRequest(imdbId)
