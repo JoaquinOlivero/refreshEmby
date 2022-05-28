@@ -10,7 +10,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 ## Get config.ini values
 config = configparser.ConfigParser()
-config.read('config.ini')
+config.read(dir_path + '/config.ini')
 embyApiKey = config.get("SETTINGS","embyApiKey")
 adminId = config.get("SETTINGS","adminId")
 
@@ -115,17 +115,18 @@ def main():
         try:
                 film = list(filter(checkFilmList, r.json()["transferring"]))
 
-                if len(itemFile) == 0:
-                        itemFile.append(film[0])
-                
                 if len(film) > 0:
-                        uploadSpeed = round(film[0]["speedAvg"] / 1000000, 2)
-                        logging.info(f'{film[0]["percentage"]}%' + " " + film[0]["name"] + " " + str(uploadSpeed) + " MB/s")
-                        itemFile[0]["percentage"] = film[0]["percentage"]
-                        time.sleep(2)
-                        checkUpload(host, srcFileName, title, imdbId)
+
+                    if len(itemFile) == 0:
+                        itemFile.append(film[0])
+
+                    uploadSpeed = round(film[0]["speedAvg"] / 1000000, 2)
+                    logging.info(f'{film[0]["percentage"]}%' + " " + film[0]["name"] + " " + str(uploadSpeed) + " MB/s")
+                    itemFile[0]["percentage"] = film[0]["percentage"]
+                    time.sleep(2)
+                    checkUpload(host, srcFileName, title, imdbId)
                 else:
-                        embyRequest(imdbId)
+                    embyRequest(imdbId)
 
         except KeyError as e:
                 if len(itemFile) > 0 and itemFile[0]["percentage"] >= 98:
